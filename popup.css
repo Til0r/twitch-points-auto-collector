@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  min-width: 25rem;
+  min-height: 10rem;
+  align-items: center;
+  flex-direction: column;
+  color: white !important;
+  background: #9146ff !important;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  padding: 1rem;
+  flex-direction: row;
+  align-items: center;
+  background-color: #b07bfe;
+}
+
+.icon-twitch {
+  padding: 0.6rem;
+}
+
+.header-text {
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  background-color: #b07bfe;
+}
+
+.title {
+  font-weight: 300;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 1rem;
+  font-weight: 200;
+  text-align: center;
+}
+
+#stats {
+  gap: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  font-size: 1rem;
+  overflow-y: auto;
+  max-height: 8rem;
+  flex-direction: column;
+  scroll-behavior: smooth;
+  scroll-margin-top: 20px;
+}
+
+.points-for-streamer {
+  gap: 3rem;
+  display: flex;
+  padding: 0rem 1.5rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.name-avatar-streamer {
+  gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.name-streamer {
+  font-weight: 400;
+}
+
+.avatar-streamer {
+  width: 1.5rem;
+  border-radius: 50%;
+}
+
+.streamer {
+  font-weight: 800;
+}
+
+.points {
+  font-weight: 200;
+}
+
+::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 1rem;
+  background: #b07bfe;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a36bf6;
+}
