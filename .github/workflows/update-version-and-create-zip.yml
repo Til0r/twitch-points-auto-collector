@@ -3,7 +3,7 @@ name: Update Version and Publish Zip to GitHub Packages
 on:
   create:
     tags:
-      - "v*"
+      - "*"
 
 jobs:
   update-version-and-publish-zip:
