@@ -1,37 +1,37 @@
 {
-    "manifest_version": 3,
-    "name": "Twitch Points Auto Collector",
-    "description": "Automate the process of tracking and accumulating points, ensuring you never miss out on rewards and benefits",
-    "version": "v0.0.0",
-    "permissions": [
-        "activeTab",
-        "tabs",
-        "webNavigation",
-        "storage",
-        "nativeMessaging"
-    ],
-    "action": {
-        "default_popup": "popup.html"
-    },
-    "host_permissions": [
+  "manifest_version": 3,
+  "name": "Twitch Points Auto Collector",
+  "description": "Automate the process of tracking and accumulating points, ensuring you never miss out on rewards and benefits",
+  "version": "v0.0.1",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "webNavigation",
+    "storage",
+    "nativeMessaging"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "host_permissions": [
+    "*://www.twitch.tv/*"
+  ],
+  "icons": {
+    "16": "/images/icon-16x16.png",
+    "48": "/images/icon-48x48.png",
+    "128": "/images/icon-128x128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "index.js"
+      ],
+      "matches": [
         "*://www.twitch.tv/*"
-    ],
-    "icons": {
-        "16": "/images/icon-16x16.png",
-        "48": "/images/icon-48x48.png",
-        "128": "/images/icon-128x128.png"
-    },
-    "background": {
-        "service_worker": "background.js"
-    },
-    "content_scripts": [
-        {
-            "js": [
-                "index.js"
-            ],
-            "matches": [
-                "*://www.twitch.tv/*"
-            ]
-        }
-    ]
+      ]
+    }
+  ]
 }
