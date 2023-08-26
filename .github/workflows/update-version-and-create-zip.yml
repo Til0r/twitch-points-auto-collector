@@ -1,0 +1,44 @@
+name: Update Version and Publish Zip to GitHub Packages
+
+on:
+  create:
+    tags:
+      - "v*"
+
+jobs:
+  update-version-and-publish-zip:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Get Tag Name
+        id: extract_tag
+        run: echo "::set-output name=TAG_NAME::${GITHUB_REF#refs/tags/}"
+
+      - name: Update Version in Manifest
+        run: |
+          tag="${{ steps.extract_tag.outputs.TAG_NAME }}"
+          version="${tag#v}"
+          sed -i "s/\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\": \"$version\"/" manifest.json
+
+      - name: Create Zip Archive
+        run: |
+          zip -r twitch-points-auto-collector.zip *
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Upload Zip to GitHub Packages
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
+          npm pack
+          npm publish --access public
+
+      - name: Cleanup
+        run: |
+          rm .npmrc
+          rm your-app.zip
