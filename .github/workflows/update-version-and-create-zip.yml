@@ -47,5 +47,16 @@ jobs:
           asset_name: twitch-points-auto-collector.zip
           asset_content_type: application/zip
 
+      - name: Set Git User
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Commit Changes
+        run: |
+          git add manifest.json
+          git commit -m "Update version and add release asset"
+          git push
+
       - name: Cleanup
         run: rm twitch-points-auto-collector.zip
