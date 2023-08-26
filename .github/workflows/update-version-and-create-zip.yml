@@ -5,9 +5,6 @@ on:
     tags:
       - "v*"
 
-env: 
-  NAME_FILE: twitch-points-auto-collector_${{ steps.extract_tag.outputs.TAG_NAME }}.zip
-
 jobs:
   update-version-and-publish-zip:
     runs-on: ubuntu-latest
@@ -25,9 +22,13 @@ jobs:
           version="${{ steps.extract_tag.outputs.TAG_NAME }}"
           jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
 
+      - name: Set Filename Variable
+        id: set_filename
+        run: echo "::set-output name=FILENAME::twitch-points-auto-collector_${{ steps.extract_tag.outputs.TAG_NAME }}.zip"
+
       - name: Create Zip Archive
         run: |
-          zip -r $NAME_FILE *
+          zip -r "${{ steps.set_filename.outputs.FILENAME }}" *
 
       - name: Create GitHub Release
         id: create_release
@@ -45,8 +46,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: $NAME_FILE
-          asset_name: $NAME_FILE
+          asset_path: "${{ steps.set_filename.outputs.FILENAME }}"
+          asset_name: "${{ steps.set_filename.outputs.FILENAME }}"
           asset_content_type: application/zip
 
       - name: Set Git User
@@ -61,4 +62,4 @@ jobs:
           git push origin HEAD:master
 
       - name: Cleanup
-        run: rm $NAME_FILE
+        run: rm "${{ steps.set_filename.outputs.FILENAME }}"
