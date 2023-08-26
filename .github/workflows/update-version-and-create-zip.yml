@@ -5,6 +5,9 @@ on:
     tags:
       - "v*"
 
+env: 
+  NAME_FILE: twitch-points-auto-collector_${{ steps.extract_tag.outputs.TAG_NAME }}.zip
+
 jobs:
   update-version-and-publish-zip:
     runs-on: ubuntu-latest
@@ -24,7 +27,7 @@ jobs:
 
       - name: Create Zip Archive
         run: |
-          zip -r twitch-points-auto-collector.zip *
+          zip -r $NAME_FILE *
 
       - name: Create GitHub Release
         id: create_release
@@ -42,8 +45,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: twitch-points-auto-collector.zip
-          asset_name: twitch-points-auto-collector.zip
+          asset_path: $NAME_FILE
+          asset_name: $NAME_FILE
           asset_content_type: application/zip
 
       - name: Set Git User
@@ -55,8 +58,7 @@ jobs:
         run: |
           git add manifest.json
           git commit -m "Update version and add release asset"
-          git show-ref
           git push origin HEAD:master
 
       - name: Cleanup
-        run: rm twitch-points-auto-collector.zip
+        run: rm $NAME_FILE
