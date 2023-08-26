@@ -53,11 +53,9 @@ jobs:
 
       - name: Commit Changes
         run: |
-          git checkout master
-          git status
           git add manifest.json
           git commit -m "Update version and add release asset"
-          git push
+          git push origin master
 
       - name: Cleanup
         run: rm twitch-points-auto-collector.zip
