@@ -21,7 +21,8 @@ jobs:
         run: |
           tag="${{ steps.extract_tag.outputs.TAG_NAME }}"
           version="${tag#v}"
-          sed -i "s/\"version\": \"[0-9]\+\.[0-9]\+\.[0-9]\+\"/\"version\": \"$version\"/" manifest.json
+          jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+
 
       - name: Create Zip Archive
         run: |
