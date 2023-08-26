@@ -27,11 +27,25 @@ jobs:
         run: |
           zip -r twitch-points-auto-collector.zip *
 
-      - name: Authenticate npm with GitHub Token
-        run: npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract_tag.outputs.TAG_NAME }}
+          release_name: Release ${{ steps.extract_tag.outputs.TAG_NAME }}
+          body: Auto-generated release for version ${{ steps.extract_tag.outputs.TAG_NAME }}
 
-      - name: Upload Zip to GitHub Packages
-        run: npm publish twitch-points-auto-collector.zip --access public --registry https://npm.pkg.github.com
+      - name: Upload Zip to Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: twitch-points-auto-collector.zip
+          asset_name: twitch-points-auto-collector.zip
+          asset_content_type: application/zip
 
       - name: Cleanup
         run: rm twitch-points-auto-collector.zip
