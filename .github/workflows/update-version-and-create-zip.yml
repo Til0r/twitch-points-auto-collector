@@ -27,18 +27,11 @@ jobs:
         run: |
           zip -r twitch-points-auto-collector.zip *
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "14"
+      - name: Authenticate npm with GitHub Token
+        run: npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Zip to GitHub Packages
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
-          npm pack
-          npm publish --access public
+        run: npm publish twitch-points-auto-collector.zip --access public --registry https://npm.pkg.github.com
 
       - name: Cleanup
-        run: |
-          rm .npmrc
-          rm your-app.zip
+        run: rm twitch-points-auto-collector.zip
