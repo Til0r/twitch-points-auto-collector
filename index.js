@@ -11,9 +11,8 @@ function mutationObserverTwilightMain(url) {
     );
 
     if (liveChannelStreamInformation) {
-      const avatarStreamer = liveChannelStreamInformation
-        .querySelector(".tw-image-avatar")
-        .getAttribute("src");
+      const avatarStreamer =
+        liveChannelStreamInformation.querySelector(".tw-image-avatar");
 
       const nameStreamer =
         liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
@@ -25,7 +24,10 @@ function mutationObserverTwilightMain(url) {
           nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
         )
       )
-        mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer);
+        mutationObserverChannelRootRightColumn(
+          nameStreamer,
+          avatarStreamer.getAttribute("src")
+        );
     }
   }, twilightMain);
 }
@@ -94,7 +96,3 @@ function disconnectMutationObserver() {
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.channel === "urlChanged") mutationObserverTwilightMain();
 });
-
-// window.addEventListener("load", function () {
-//   mutationObserverTwilightMain();
-// });

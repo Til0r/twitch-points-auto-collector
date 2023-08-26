@@ -3,7 +3,7 @@ body {
   padding: 0;
   display: flex;
   min-width: 25rem;
-  min-height: 10rem;
+  min-height: 8rem;
   align-items: center;
   flex-direction: column;
   color: white !important;
@@ -42,9 +42,12 @@ body {
   text-align: center;
 }
 
+.container-stats {
+  padding: 0.5rem;
+}
+
 #stats {
   gap: 0.5rem;
-  padding: 1rem;
   display: flex;
   font-size: 1rem;
   overflow-y: auto;
