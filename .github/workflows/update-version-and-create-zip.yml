@@ -19,10 +19,8 @@ jobs:
 
       - name: Update Version in Manifest
         run: |
-          tag="${{ steps.extract_tag.outputs.TAG_NAME }}"
-          version="${tag#v}"
+          version="${{ steps.extract_tag.outputs.TAG_NAME }}"
           jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
-
 
       - name: Create Zip Archive
         run: |
@@ -55,6 +53,7 @@ jobs:
 
       - name: Commit Changes
         run: |
+          git status
           git add manifest.json
           git commit -m "Update version and add release asset"
           git push
