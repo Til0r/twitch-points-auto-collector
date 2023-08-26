@@ -53,6 +53,7 @@ jobs:
 
       - name: Commit Changes
         run: |
+          git checkout master
           git status
           git add manifest.json
           git commit -m "Update version and add release asset"
