@@ -59,17 +59,17 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
                 "button"
               )[0];
 
-            // if (communityPointsSummaryButton) {
-            //   communityPointsSummaryButton.click();
+            if (communityPointsSummaryButton) {
+              communityPointsSummaryButton.click();
 
-            if (chrome)
-              chrome.runtime.sendMessage({
-                channel: "pointsClaimed",
-                nameStreamer,
-                avatarStreamer,
-                url: window.location.href,
-              });
-            // }
+              if (chrome)
+                chrome.runtime.sendMessage({
+                  channel: "pointsClaimed",
+                  nameStreamer,
+                  avatarStreamer,
+                  url: window.location.href,
+                });
+            }
           }
         }
       }
