@@ -23,6 +23,10 @@ body {
   padding: 0.6rem;
 }
 
+svg {
+  width: 2.5rem;
+}
+
 .header-text {
   gap: 0.5rem;
   display: flex;
