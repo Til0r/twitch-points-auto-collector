@@ -6,8 +6,7 @@
   "permissions": [
     "activeTab",
     "tabs",
-    "storage",
-    "nativeMessaging"
+    "storage"
   ],
   "action": {
     "default_popup": "popup.html"
