@@ -7,26 +7,28 @@ function mutationObserverTwilightMain(url) {
 
   startMutationObserver(() => {
     const liveChannelStreamInformation = document.querySelector(
-      "#live-channel-stream-information"
+      "#live-channel-stream-information-upper"
     );
 
     if (liveChannelStreamInformation) {
       const avatarStreamer =
-        liveChannelStreamInformation.querySelector(".tw-image-avatar");
+        liveChannelStreamInformation.querySelector(".tw-image-avatar").getAttribute("src");
 
       const nameStreamer =
         liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
 
+      const nameStreamerIsPresentInUrl = url.includes(
+        nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
+      )
+
       if (
         nameStreamer &&
         avatarStreamer &&
-        url.includes(
-          nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
-        )
+        nameStreamerIsPresentInUrl
       )
         mutationObserverChannelRootRightColumn(
           nameStreamer,
-          avatarStreamer.getAttribute("src")
+          avatarStreamer
         );
     }
   }, twilightMain);
