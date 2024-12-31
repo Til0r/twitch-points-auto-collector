@@ -26,10 +26,17 @@ jobs:
         id: set_filename
         run: echo "FILENAME=twitch-points-auto-collector_${{ env.TAG_NAME }}.zip" >> $GITHUB_ENV
 
+      - name: Debug FILENAME
+        run: echo "FILENAME is $FILENAME"
+
       - name: Create Zip Archive
         run: |
           zip -r "$FILENAME" *
+          ls -l
           echo "$FILENAME created"
+
+      - name: Verify File Exists
+        run: ls -l
 
       - name: Create GitHub Release
         id: create_release
@@ -47,8 +54,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "$FILENAME"
-          asset_name: "$FILENAME"
+          asset_path: "${{ env.FILENAME }}"
+          asset_name: "${{ env.FILENAME }}"
           asset_content_type: application/zip
 
       - name: Set Git User
