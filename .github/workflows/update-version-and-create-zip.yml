@@ -12,10 +12,18 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Get Tag Name
         id: extract_tag
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Detect Default Branch
+        id: detect_branch
+        run: |
+          default_branch=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+          echo "DEFAULT_BRANCH=$default_branch" >> $GITHUB_ENV
 
       - name: Update Version in Manifest
         run: |
@@ -51,15 +59,14 @@ jobs:
           asset_name: "${{ env.FILENAME }}"
           asset_content_type: application/zip
 
-      - name: Switch to Master Branch
-        run: |
-          git checkout master
+      - name: Switch to Default Branch
+        run: git checkout ${{ env.DEFAULT_BRANCH }}
 
       - name: Commit Changes
         run: |
           git add manifest.json
           git commit -m "Update version and add release asset"
-          git push origin master
+          git push origin ${{ env.DEFAULT_BRANCH }}
 
       - name: Cleanup
         run: rm "$FILENAME"
