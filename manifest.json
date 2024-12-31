@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Twitch Points Auto Collector",
   "description": "Automate the process of tracking and accumulating points, ensuring you never miss out on rewards and benefits",
-  "version": "0.0.4",
+  "version": "0.0.4-rc",
   "permissions": [
     "activeTab",
     "tabs",
