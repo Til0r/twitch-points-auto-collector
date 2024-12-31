@@ -59,6 +59,11 @@ jobs:
           asset_name: "${{ env.FILENAME }}"
           asset_content_type: application/zip
 
+      - name: Configure Git User
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Switch to Default Branch
         run: git checkout ${{ env.DEFAULT_BRANCH }}
 
