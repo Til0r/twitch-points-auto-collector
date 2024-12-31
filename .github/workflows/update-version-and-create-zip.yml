@@ -1,77 +1,82 @@
 name: Update Version and Publish Zip to GitHub Packages
 
 on:
-  push:
-    tags:
-      - "*"
+ push:
+   tags:
+     - "*"
+
+permissions:
+ contents: write
 
 jobs:
-  update-version-and-publish-zip:
-    runs-on: ubuntu-latest
+ update-version-and-publish-zip:
+   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+   steps:
+     - name: Checkout Repository
+       uses: actions/checkout@v2
+       with:
+         fetch-depth: 0
 
-      - name: Get Tag Name
-        id: extract_tag
-        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+     - name: Get Tag Name
+       id: extract_tag
+       run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Detect Default Branch
-        id: detect_branch
-        run: |
-          default_branch=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
-          echo "DEFAULT_BRANCH=$default_branch" >> $GITHUB_ENV
+     - name: Detect Default Branch
+       id: detect_branch
+       run: |
+         default_branch=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+         echo "DEFAULT_BRANCH=$default_branch" >> $GITHUB_ENV
 
-      - name: Update Version in Manifest
-        run: |
-          version="${{ env.TAG_NAME }}"
-          jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
+     - name: Update Version in Manifest
+       run: |
+         version="${{ env.TAG_NAME }}"
+         jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
 
-      - name: Set Filename Variable
-        id: set_filename
-        run: echo "FILENAME=twitch-points-auto-collector_${{ env.TAG_NAME }}.zip" >> $GITHUB_ENV
+     - name: Set Filename Variable
+       id: set_filename
+       run: echo "FILENAME=twitch-points-auto-collector_${{ env.TAG_NAME }}.zip" >> $GITHUB_ENV
 
-      - name: Create Zip Archive
-        run: |
-          zip -r "$FILENAME" *
-          echo "$FILENAME created"
+     - name: Create Zip Archive
+       run: |
+         zip -r "$FILENAME" *
+         echo "$FILENAME created"
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Release ${{ env.TAG_NAME }}
-          body: Auto-generated release for version ${{ env.TAG_NAME }}
+     - name: Create GitHub Release
+       id: create_release
+       uses: actions/create-release@v1
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+         tag_name: ${{ env.TAG_NAME }}
+         release_name: Release ${{ env.TAG_NAME }}
+         body: Auto-generated release for version ${{ env.TAG_NAME }}
+         draft: false
+         prerelease: false
 
-      - name: Upload Zip to Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "${{ env.FILENAME }}"
-          asset_name: "${{ env.FILENAME }}"
-          asset_content_type: application/zip
+     - name: Upload Zip to Release Assets
+       uses: actions/upload-release-asset@v1
+       env:
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       with:
+         upload_url: ${{ steps.create_release.outputs.upload_url }}
+         asset_path: "${{ env.FILENAME }}"
+         asset_name: "${{ env.FILENAME }}"
+         asset_content_type: application/zip
 
-      - name: Configure Git User
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+     - name: Configure Git User
+       run: |
+         git config --global user.name "${{ github.actor }}"
+         git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Switch to Default Branch
-        run: git checkout ${{ env.DEFAULT_BRANCH }}
+     - name: Switch to Default Branch
+       run: git checkout ${{ env.DEFAULT_BRANCH }}
 
-      - name: Commit Changes
-        run: |
-          git add manifest.json
-          git commit -m "Update version and add release asset"
-          git push origin ${{ env.DEFAULT_BRANCH }}
+     - name: Commit Changes
+       run: |
+         git add manifest.json
+         git commit -m "Update version and add release asset"
+         git push origin ${{ env.DEFAULT_BRANCH }}
 
-      - name: Cleanup
-        run: rm "$FILENAME"
+     - name: Cleanup
+       run: rm "$FILENAME"
