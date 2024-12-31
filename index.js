@@ -7,7 +7,7 @@ function mutationObserverTwilightMain(url) {
 
   startMutationObserver(() => {
     const liveChannelStreamInformation = document.querySelector(
-      "#live-channel-stream-information-upper"
+      "#live-channel-stream-information"
     );
 
     if (liveChannelStreamInformation) {
