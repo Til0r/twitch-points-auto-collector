@@ -1,7 +1,7 @@
 name: Update Version and Publish Zip to GitHub Packages
 
 on:
-  create:
+  push:
     tags:
       - "*"
 
@@ -15,20 +15,21 @@ jobs:
 
       - name: Get Tag Name
         id: extract_tag
-        run: echo "::set-output name=TAG_NAME::${GITHUB_REF#refs/tags/}"
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
       - name: Update Version in Manifest
         run: |
-          version="${{ steps.extract_tag.outputs.TAG_NAME }}"
+          version="${{ env.TAG_NAME }}"
           jq --arg new_version "$version" '.version = $new_version' manifest.json > manifest.tmp && mv manifest.tmp manifest.json
 
       - name: Set Filename Variable
         id: set_filename
-        run: echo "::set-output name=FILENAME::twitch-points-auto-collector_${{ steps.extract_tag.outputs.TAG_NAME }}.zip"
+        run: echo "FILENAME=twitch-points-auto-collector_${{ env.TAG_NAME }}.zip" >> $GITHUB_ENV
 
       - name: Create Zip Archive
         run: |
-          zip -r "${{ steps.set_filename.outputs.FILENAME }}" *
+          zip -r "$FILENAME" *
+          echo "$FILENAME created"
 
       - name: Create GitHub Release
         id: create_release
@@ -36,9 +37,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.extract_tag.outputs.TAG_NAME }}
-          release_name: Release ${{ steps.extract_tag.outputs.TAG_NAME }}
-          body: Auto-generated release for version ${{ steps.extract_tag.outputs.TAG_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: Release ${{ env.TAG_NAME }}
+          body: Auto-generated release for version ${{ env.TAG_NAME }}
 
       - name: Upload Zip to Release Assets
         uses: actions/upload-release-asset@v1
@@ -46,8 +47,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "${{ steps.set_filename.outputs.FILENAME }}"
-          asset_name: "${{ steps.set_filename.outputs.FILENAME }}"
+          asset_path: "$FILENAME"
+          asset_name: "$FILENAME"
           asset_content_type: application/zip
 
       - name: Set Git User
@@ -62,4 +63,4 @@ jobs:
           git push origin HEAD:master
 
       - name: Cleanup
-        run: rm "${{ steps.set_filename.outputs.FILENAME }}"
+        run: rm "$FILENAME"
