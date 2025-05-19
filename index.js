@@ -3,33 +3,36 @@ let genericMutationObserver = null;
 function mutationObserverTwilightMain(url) {
   const twilightMain = document.getElementsByClassName("twilight-main")[0];
 
-  if (!url) url = window.location.href;
+  if (!url) { url = window.location.href; }
 
   startMutationObserver(() => {
     const liveChannelStreamInformation = document.querySelector(
       "#live-channel-stream-information"
     );
 
-    if (liveChannelStreamInformation) {
-      const avatarStreamer =
-        liveChannelStreamInformation.querySelector(".tw-image-avatar").getAttribute("src");
+    if (!liveChannelStreamInformation) {
+      return
+    }
 
-      const nameStreamer =
-        liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
+    const avatarStreamer =
+      liveChannelStreamInformation.querySelector(".tw-image-avatar").getAttribute("src");
 
-      const nameStreamerIsPresentInUrl = url.includes(
-        nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
-      )
+    const nameStreamer =
+      liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
 
-      if (
-        nameStreamer &&
-        avatarStreamer &&
-        nameStreamerIsPresentInUrl
-      )
-        mutationObserverChannelRootRightColumn(
-          nameStreamer,
-          avatarStreamer
-        );
+    const nameStreamerIsPresentInUrl = url.includes(
+      nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
+    )
+
+    if (
+      nameStreamer &&
+      avatarStreamer &&
+      nameStreamerIsPresentInUrl
+    ) {
+      mutationObserverChannelRootRightColumn(
+        nameStreamer,
+        avatarStreamer
+      );
     }
   }, twilightMain);
 }
@@ -39,44 +42,54 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
     "channel-root__right-column"
   )[0];
 
-  if (channelRootRightColumn)
-    startMutationObserver(() => {
-      const communityPointsSummary = document.getElementsByClassName(
-        "community-points-summary"
+  if (!channelRootRightColumn) {
+    disconnectMutationObserver();
+  }
+
+  startMutationObserver(() => {
+    const communityPointsSummary = document.getElementsByClassName(
+      "community-points-summary"
+    )[0];
+
+    if (!communityPointsSummary) {
+      return
+    }
+
+    const communityPointsSummaryChild = communityPointsSummary?.childNodes;
+
+    if (!communityPointsSummaryChild) {
+      return
+    }
+
+    const communityPointsSummaryContainerButton =
+      communityPointsSummaryChild[1];
+
+    if (!communityPointsSummaryContainerButton) {
+      return
+    }
+
+    const communityPointsSummaryButton =
+      communityPointsSummaryContainerButton.getElementsByTagName(
+        "button"
       )[0];
 
-      if (communityPointsSummary) {
-        const communityPointsSummaryChild = communityPointsSummary?.childNodes;
+    if (!communityPointsSummaryButton) {
+      return
+    }
 
-        if (
-          communityPointsSummaryChild &&
-          communityPointsSummaryChild.length >= 2
-        ) {
-          const communityPointsSummaryContainerButton =
-            communityPointsSummaryChild[1];
+    communityPointsSummaryButton.click();
 
-          if (communityPointsSummaryContainerButton) {
-            const communityPointsSummaryButton =
-              communityPointsSummaryContainerButton.getElementsByTagName(
-                "button"
-              )[0];
+    if (!chrome) {
+      return
+    }
 
-            if (communityPointsSummaryButton) {
-              communityPointsSummaryButton.click();
-
-              if (chrome)
-                chrome.runtime.sendMessage({
-                  channel: "pointsClaimed",
-                  nameStreamer,
-                  avatarStreamer,
-                  url: window.location.href,
-                });
-            }
-          }
-        }
-      }
-    }, channelRootRightColumn);
-  else disconnectMutationObserver();
+    chrome.runtime.sendMessage({
+      channel: "pointsClaimed",
+      nameStreamer,
+      avatarStreamer,
+      url: window.location.href,
+    });
+  }, channelRootRightColumn)
 }
 
 function startMutationObserver(callback, element) {
