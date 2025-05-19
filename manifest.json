@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Twitch Points Auto Collector",
   "description": "Automatically collect Twitch channel points while you watch streams. Never miss out on channel points rewards and benefits. Features automatic point collection, point tracking, and real-time statistics.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "til0r",
   "homepage_url": "https://github.com/til0r/twitch-points-auto-collector",
   "permissions": [
