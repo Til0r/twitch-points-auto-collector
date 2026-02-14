@@ -1,9 +1,9 @@
 let genericMutationObserver = null;
 
-function mutationObserverTwilightMain(url) {
+function mutationObserverTwilightMain(url = window.location.href) {
   const twilightMain = document.getElementsByClassName("twilight-main")[0];
 
-  if (!url) { url = window.location.href; }
+  if (!twilightMain) return;
 
   startMutationObserver(() => {
     const liveChannelStreamInformation = document.querySelector(
@@ -15,7 +15,7 @@ function mutationObserverTwilightMain(url) {
     }
 
     const avatarStreamer =
-      liveChannelStreamInformation.querySelector(".tw-image-avatar").getAttribute("src");
+      liveChannelStreamInformation.querySelector(".tw-image-avatar")?.getAttribute("src");
 
     const nameStreamer =
       liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
@@ -44,6 +44,7 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
 
   if (!channelRootRightColumn) {
     disconnectMutationObserver();
+    return;
   }
 
   startMutationObserver(() => {
@@ -55,14 +56,8 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
       return
     }
 
-    const communityPointsSummaryChild = communityPointsSummary?.childNodes;
-
-    if (!communityPointsSummaryChild) {
-      return
-    }
-
     const communityPointsSummaryContainerButton =
-      communityPointsSummaryChild[1];
+      communityPointsSummary.childNodes[1];
 
     if (!communityPointsSummaryContainerButton) {
       return
@@ -78,10 +73,6 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
     }
 
     communityPointsSummaryButton.click();
-
-    if (!chrome) {
-      return
-    }
 
     chrome.runtime.sendMessage({
       channel: "pointsClaimed",
@@ -104,10 +95,12 @@ function startMutationObserver(callback, element) {
 }
 
 function disconnectMutationObserver() {
-  genericMutationObserver.disconnect();
-  genericMutationObserver = null;
+  if (genericMutationObserver) {
+    genericMutationObserver.disconnect();
+    genericMutationObserver = null;
+  }
 }
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request) => {
   if (request.channel === "urlChanged") mutationObserverTwilightMain();
 });

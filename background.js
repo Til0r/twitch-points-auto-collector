@@ -13,7 +13,7 @@ runtime.onUpdateAvailable.addListener(() => {
   runtime.reload();
 });
 
-runtime.onMessage.addListener((message, sender, sendResponse) => {
+runtime.onMessage.addListener((message, sender) => {
   const { channel, avatarStreamer, nameStreamer, url } = message;
 
   if (channel === "pointsClaimed") {
@@ -22,12 +22,11 @@ runtime.onMessage.addListener((message, sender, sendResponse) => {
     chromeLocalStorage.get("twitchPointsAutoCollectorStats").then((storage) => {
       const { twitchPointsAutoCollectorStats } = storage;
 
-      const pointsClaimed = `${
-        twitchPointsAutoCollectorStats &&
+      const pointsClaimed = `${twitchPointsAutoCollectorStats &&
         nameStreamer in twitchPointsAutoCollectorStats
-          ? parseInt(twitchPointsAutoCollectorStats[nameStreamer].points) + 1
-          : 1
-      }`;
+        ? Number.parseInt(twitchPointsAutoCollectorStats[nameStreamer].points) + 1
+        : 1
+        }`;
 
       const newTwitchPointsAutoCollectorStats = {
         twitchPointsAutoCollectorStats: {
@@ -48,12 +47,12 @@ runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     tabs.sendMessage(tabId, {
       channel: "urlChanged",
       url: tab.url,
-    });
+    }).catch(() => {});
 
     chromeLocalStorage.get("twitchPointsAutoCollectorStats").then((storage) => {
       const { twitchPointsAutoCollectorStats } = storage;
@@ -71,10 +70,19 @@ tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
   }
 });
 
+function formatBadgeText(text) {
+  if (!text) return text;
+  const num = Number.parseInt(text);
+  if (Number.isNaN(num)) return text;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return `${num}`;
+}
+
 function setBadge(tabId, text) {
   chrome.action.setBadgeText({
     tabId,
-    text,
+    text: formatBadgeText(text),
   });
 
   chrome.action.setBadgeBackgroundColor({
