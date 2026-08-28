@@ -1,10 +1,19 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
   padding: 0;
+  width: 25rem;
+  overflow-x: hidden;
+}
+
+body {
   display: flex;
-  min-width: 25rem;
   min-height: 8rem;
-  align-items: center;
+  align-items: stretch;
   flex-direction: column;
   color: white !important;
   background: #9146ff !important;
@@ -47,12 +56,14 @@ svg {
 }
 
 .container-stats {
+  width: 100%;
   padding: 0.5rem;
 }
 
 #stats {
   gap: 0.5rem;
   display: flex;
+  width: 100%;
   font-size: 1rem;
   overflow-y: auto;
   max-height: 8rem;
@@ -62,9 +73,10 @@ svg {
 }
 
 .points-for-streamer {
-  gap: 3rem;
+  gap: 1rem;
   display: flex;
-  padding: 0rem 1.5rem;
+  width: 100%;
+  padding: 0 1.5rem;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -72,17 +84,27 @@ svg {
 .name-avatar-streamer {
   gap: 0.5rem;
   display: flex;
+  min-width: 0;
   align-items: center;
   flex-direction: row;
 }
 
 .name-streamer {
+  overflow: hidden;
   font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .avatar-streamer {
   width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
   border-radius: 50%;
+}
+
+.points-for-streamer > div:last-child {
+  flex: 0 0 auto;
 }
 
 .streamer {

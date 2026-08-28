@@ -1,8 +1,9 @@
 const localStorageChrome = chrome.storage.local;
 
 localStorageChrome.onChanged.addListener((storage) => {
-  const newValue = storage?.twitchPointsAutoCollectorStats?.newValue;
-  if (newValue && Object.keys(newValue).length) generateUi(newValue);
+  if ("twitchPointsAutoCollectorStats" in storage) {
+    generateUi(storage.twitchPointsAutoCollectorStats.newValue || {});
+  }
 });
 
 localStorageChrome.get("twitchPointsAutoCollectorStats").then((storage) => {

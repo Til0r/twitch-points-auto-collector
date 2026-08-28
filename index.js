@@ -1,4 +1,10 @@
 let genericMutationObserver = null;
+let lastClaim = {
+  key: null,
+  claimedAt: 0,
+};
+
+const CLAIM_DEBOUNCE_MS = 2000;
 
 function mutationObserverTwilightMain(url = window.location.href) {
   const twilightMain = document.getElementsByClassName("twilight-main")[0];
@@ -11,7 +17,7 @@ function mutationObserverTwilightMain(url = window.location.href) {
     );
 
     if (!liveChannelStreamInformation) {
-      return
+      return;
     }
 
     const avatarStreamer =
@@ -20,15 +26,15 @@ function mutationObserverTwilightMain(url = window.location.href) {
     const nameStreamer =
       liveChannelStreamInformation.querySelector(".tw-title")?.innerText;
 
+    if (!nameStreamer || !avatarStreamer) {
+      return;
+    }
+
     const nameStreamerIsPresentInUrl = url.includes(
       nameStreamer.split(" ").filter(Boolean).join("").toLowerCase()
-    )
+    );
 
-    if (
-      nameStreamer &&
-      avatarStreamer &&
-      nameStreamerIsPresentInUrl
-    ) {
+    if (nameStreamerIsPresentInUrl) {
       mutationObserverChannelRootRightColumn(
         nameStreamer,
         avatarStreamer
@@ -53,26 +59,22 @@ function mutationObserverChannelRootRightColumn(nameStreamer, avatarStreamer) {
     )[0];
 
     if (!communityPointsSummary) {
-      return
-    }
-
-    const communityPointsSummaryContainerButton =
-      communityPointsSummary.childNodes[1];
-
-    if (!communityPointsSummaryContainerButton) {
-      return
+      return;
     }
 
     const communityPointsSummaryButton =
-      communityPointsSummaryContainerButton.getElementsByTagName(
-        "button"
-      )[0];
+      communityPointsSummary.querySelector("button:not([disabled])");
 
     if (!communityPointsSummaryButton) {
-      return
+      return;
+    }
+
+    if (claimWasRecentlyHandled(nameStreamer)) {
+      return;
     }
 
     communityPointsSummaryButton.click();
+    markClaimHandled(nameStreamer);
 
     chrome.runtime.sendMessage({
       channel: "pointsClaimed",
@@ -101,6 +103,25 @@ function disconnectMutationObserver() {
   }
 }
 
+function claimWasRecentlyHandled(nameStreamer) {
+  const claimKey = `${window.location.href}:${nameStreamer}`;
+  const now = Date.now();
+
+  return (
+    lastClaim.key === claimKey &&
+    now - lastClaim.claimedAt < CLAIM_DEBOUNCE_MS
+  );
+}
+
+function markClaimHandled(nameStreamer) {
+  lastClaim = {
+    key: `${window.location.href}:${nameStreamer}`,
+    claimedAt: Date.now(),
+  };
+}
+
 chrome.runtime.onMessage.addListener((request) => {
-  if (request.channel === "urlChanged") mutationObserverTwilightMain();
+  if (request.channel === "urlChanged") mutationObserverTwilightMain(request.url);
 });
+
+mutationObserverTwilightMain();
