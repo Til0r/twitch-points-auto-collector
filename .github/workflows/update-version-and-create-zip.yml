@@ -14,7 +14,7 @@ jobs:
 
    steps:
      - name: Checkout Repository
-       uses: actions/checkout@v2
+       uses: actions/checkout@v6
        with:
          fetch-depth: 0
 
@@ -42,27 +42,17 @@ jobs:
          zip -r "$FILENAME" *
          echo "$FILENAME created"
 
-     - name: Create GitHub Release
-       id: create_release
-       uses: actions/create-release@v1
+     - name: Create or Update GitHub Release
        env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       with:
-         tag_name: ${{ env.TAG_NAME }}
-         release_name: Release ${{ env.TAG_NAME }}
-         body: Auto-generated release for version ${{ env.TAG_NAME }}
-         draft: false
-         prerelease: false
+       run: |
+         if ! gh release view "$TAG_NAME" >/dev/null 2>&1; then
+           gh release create "$TAG_NAME" \
+             --title "Release $TAG_NAME" \
+             --notes "Auto-generated release for version $TAG_NAME"
+         fi
 
-     - name: Upload Zip to Release Assets
-       uses: actions/upload-release-asset@v1
-       env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       with:
-         upload_url: ${{ steps.create_release.outputs.upload_url }}
-         asset_path: "${{ env.FILENAME }}"
-         asset_name: "${{ env.FILENAME }}"
-         asset_content_type: application/zip
+         gh release upload "$TAG_NAME" "$FILENAME" --clobber
 
      - name: Configure Git User
        run: |
@@ -75,7 +65,12 @@ jobs:
      - name: Commit Changes
        run: |
          git add manifest.json
-         git commit -m "Update version and add release asset"
+         if git diff --cached --quiet; then
+           echo "manifest.json already matches $TAG_NAME"
+           exit 0
+         fi
+
+         git commit -m "Update manifest version to $TAG_NAME"
          git push origin ${{ env.DEFAULT_BRANCH }}
 
      - name: Cleanup
