@@ -8,10 +8,28 @@ runtime.onInstalled.addListener(() => {
   console.log("TwitchPointsAutoCollector ==> Extension installed!");
 });
 
-runtime.onUpdateAvailable.addListener(() => {
-  console.log("TwitchPointsAutoCollector ==> Extension updated!");
-  runtime.reload();
-});
+// Serializes every stats read-modify-write behind one promise chain so a
+// "pointsClaimed" and a "watchTimeTick" landing close together (or two of the
+// same type) can't race and silently drop one of them.
+let statsQueue = Promise.resolve();
+
+function updateStats(updater) {
+  statsQueue = statsQueue
+    .then(() => chromeLocalStorage.get("twitchPointsAutoCollectorStats"))
+    .then((storage) => {
+      const updatedStats = updater(storage.twitchPointsAutoCollectorStats || {});
+
+      return chromeLocalStorage
+        .set({ twitchPointsAutoCollectorStats: updatedStats })
+        .then(() => updatedStats);
+    })
+    .catch((error) => {
+      console.error("TwitchPointsAutoCollector ==> Failed to update stats", error);
+      return {};
+    });
+
+  return statsQueue;
+}
 
 runtime.onMessage.addListener((message, sender) => {
   const { channel, avatarStreamer, nameStreamer, url } = message;
@@ -19,30 +37,43 @@ runtime.onMessage.addListener((message, sender) => {
   if (channel === "pointsClaimed") {
     const { tab } = sender;
 
-    chromeLocalStorage.get("twitchPointsAutoCollectorStats").then((storage) => {
-      const { twitchPointsAutoCollectorStats } = storage;
+    updateStats((currentStats) => {
+      const existing = currentStats[nameStreamer];
+      const pointsClaimed = `${existing ? Number.parseInt(existing.points) + 1 : 1}`;
 
-      const pointsClaimed = `${twitchPointsAutoCollectorStats &&
-        nameStreamer in twitchPointsAutoCollectorStats
-        ? Number.parseInt(twitchPointsAutoCollectorStats[nameStreamer].points) + 1
-        : 1
-        }`;
-
-      const newTwitchPointsAutoCollectorStats = {
-        twitchPointsAutoCollectorStats: {
-          ...twitchPointsAutoCollectorStats,
-          [nameStreamer]: {
-            points: pointsClaimed,
-            avatarStreamer,
-            nameStreamer,
-            url,
-          },
+      return {
+        ...currentStats,
+        [nameStreamer]: {
+          ...existing,
+          points: pointsClaimed,
+          avatarStreamer,
+          nameStreamer,
+          url,
         },
       };
+    }).then((updatedStats) => {
+      setBadge(tab.id, updatedStats[nameStreamer].points);
+    });
+  }
 
-      chromeLocalStorage.set(newTwitchPointsAutoCollectorStats).then(() => {
-        setBadge(tab.id, pointsClaimed);
-      });
+  if (channel === "watchTimeTick") {
+    const { seconds } = message;
+
+    updateStats((currentStats) => {
+      const existing = currentStats[nameStreamer];
+      const watchTimeSeconds = (existing?.watchTimeSeconds || 0) + seconds;
+
+      return {
+        ...currentStats,
+        [nameStreamer]: {
+          points: existing?.points || "0",
+          ...existing,
+          avatarStreamer,
+          nameStreamer,
+          url,
+          watchTimeSeconds,
+        },
+      };
     });
   }
 });

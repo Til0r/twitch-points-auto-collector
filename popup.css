@@ -38,9 +38,40 @@ svg {
 
 .header-text {
   gap: 0.5rem;
+  flex: 1;
   display: flex;
+  min-width: 0;
   flex-direction: column;
   background-color: #b07bfe;
+}
+
+.refresh-button {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.4rem;
+  margin-left: 0.5rem;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.4s ease;
+}
+
+.refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.refresh-button:active {
+  transform: rotate(180deg);
+}
+
+.refresh-button svg {
+  width: 100%;
+  height: 100%;
 }
 
 .title {
@@ -72,6 +103,13 @@ svg {
   scroll-margin-top: 20px;
 }
 
+.streamer-block {
+  gap: 0.25rem;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
 .points-for-streamer {
   gap: 1rem;
   display: flex;
@@ -80,6 +118,16 @@ svg {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+}
+
+.watch-time-info {
+  padding: 0 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 200;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .name-avatar-streamer {
   gap: 0.5rem;
